@@ -32,4 +32,13 @@ get '/bar/baz' => sub {
     );
 };
 
+get '/{year:[0-9]{4}}/{month:[0-9]{2}}' => sub {
+    my ($self, $ctx) = @_;
+    $ctx->response->set_template('path_query.html');
+    $ctx->stash(
+        year  => $ctx->req->path_query('year'),
+        month => $ctx->req->path_query('month'),
+    );
+};
+
 !!1;

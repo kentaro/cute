@@ -25,10 +25,10 @@ sub set_template {
 sub template {
     my $self = shift;
 
-    if (!$self->path || ($self->path && ref $self->path || $self->_template)) {
+    if (!$self->path || ($self->path && ref $self->path && $self->_template)) {
         HTTP::Exception->throw(404);
     }
-    else {
+    elsif (!$self->_template) {
         my ($template)  = $self->path =~ m{^/(.*)};
             $template ||= 'index';
             $template  .= '.html';

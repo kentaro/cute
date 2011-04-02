@@ -62,10 +62,8 @@ sub install_methods {
             my $path = '/' . ($path_segments || '') . ($pattern || '');
             $class->router->connect(
                 $path,
-                {
-                    controller => $call_pkg, path => $path },
-                {
-                    method  => uc $method },
+                { controller => $call_pkg, path => $path },
+                { method  => uc $method },
             );
             $class->action->register($path, $method, $code);
         }
@@ -109,11 +107,15 @@ sub run {
         $context->controller = $controller;
         my $path = $route->{path};
         $response->path($path);
+        $request->path_query(%$route);
         my $method  = lc $env->{REQUEST_METHOD};
         my $action  = $class->action->retrieve($path, $method);
         eval { $action->($controller, $context) };
         if (my $exception = HTTP::Exception->caught) {
             $response->code($exception->code);
+        }
+        if ($@) {
+            $response->code(500);
         }
         $response->code($response->code || 200);
     }
