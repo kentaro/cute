@@ -34,10 +34,10 @@ sub import {
 
     {
         no strict 'refs';
-        $base ||= $class;
+        $base ||= __PACKAGE__;
 
-        if (!UNIVERSAL::isa($base, $class)) {
-            die qq{base class `$base' must be a subclass of $class};
+        if (!UNIVERSAL::isa($base, __PACKAGE__)) {
+            die qq{base class `$base' must be a subclass of @{[__PACKAGE__]}};
         }
 
         unshift @{"$call_pkg\::ISA"}, $base;
