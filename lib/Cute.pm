@@ -140,13 +140,14 @@ sub handle_response {
     my $option      = $view_option->{option} || {};
     my $view        = Cute::View->new({ engine => $engine, option => $option });
 
-    if ($context->response->is_success && !$context->response->content) {
+    if (!$context->response->is_error && !$context->response->content) {
         my $template = eval {
             my $file     = $context->response->template;
             my $template = $class->root->subdir('templates')->file($file);
             (!-e $template) && HTTP::Exception->throw(404);
             $template;
         };
+
         if (my $exception = HTTP::Exception->caught) {
             $context->response->code(404);
         }
