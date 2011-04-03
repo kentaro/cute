@@ -17,6 +17,10 @@ sub is_error {
     HTTP::Status::is_error($self->code);
 }
 
+sub is_redirect { !!shift->location }
+
+sub has_content { defined shift->content }
+
 sub set_template {
     my ($self, $template) = @_;
     $self->_template($template);

@@ -3,7 +3,6 @@ use strict;
 use warnings;
 use parent qw(Cute::Controller);
 
-use Tiffany;
 use Smart::Args;
 use Module::Collect;
 use Class::Inspector;
@@ -44,7 +43,7 @@ sub import {
     }
 
     $class->install_methods($call_pkg);
-    $call_pkg->install_controlers;
+    $call_pkg->load_controlers;
 }
 
 sub install_methods {
@@ -58,8 +57,8 @@ sub install_methods {
             $pattern =~ s{^/}{};
             my ($path_segments)  = $call_pkg =~ /Controller::(.+)$/;
             $path_segments = join '/', (split /::/, lc($path_segments || ''));
-            $path_segments .= '/' if $path_segments;
-            my $path = '/' . ($path_segments || '') . ($pattern || '');
+            $path_segments .= '/' if $path_segments && $pattern;
+            my $path = '/' . $path_segments . $pattern;
             $class->router->connect(
                 $path,
                 { controller => $call_pkg, path => $path },
@@ -70,7 +69,7 @@ sub install_methods {
     }
 }
 
-sub install_controlers {
+sub load_controlers {
     my $class  = shift;
     return if $class =~ /::Controller::/;
 
@@ -140,7 +139,9 @@ sub handle_response {
     my $option      = $view_option->{option} || {};
     my $view        = Cute::View->new({ engine => $engine, option => $option });
 
-    if (!$context->response->is_error && !$context->response->content) {
+    if (!$context->response->is_error    &&
+        !$context->response->is_redirect &&
+        !$context->response->has_content) {
         my $template = eval {
             my $file     = $context->response->template;
             my $template = $class->root->subdir('templates')->file($file);
